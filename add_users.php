@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
  $User_role = $_POST['User_role'];
   
 
- if (empty($User_name) || empty($User_email) || empty($Password) || empty($User_role)) { 
+ if (empty($User_name) || empty($User_email) || empty($Password) || empty($Role)) { 
 
  echo "Please fill in all fields."; 
 
@@ -27,9 +27,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
  
 
- $sql = "INSERT INTO Users (User_name, User_email, Password, User_role) 
+ $sql = "INSERT INTO Users (User_name, User_email, Password, Role) 
 
- VALUES ('$User_name', '$User_email', '$Password', '$User_role')"; 
+ VALUES ('$User_name', '$User_email', '$Password', '$Role')"; 
 
  
 
