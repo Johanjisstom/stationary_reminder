@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
  $Password = $_POST['Password']; 
 
- $User_role = $_POST['User_role'];
+ $User_role = $_POST['Role'];
   
 
  if (empty($User_name) || empty($User_email) || empty($Password) || empty($Role)) { 
