@@ -54,8 +54,6 @@ AND Password = '$Password'";
 
 <link rel="stylesheet" href="style.css"> 
 <title>Welcome to Stationary Reminder</title>
-<link rel="icon" type="images/x-icon" href="/images/books.ico"> 
-
 </head> 
 
 <body> 
@@ -75,11 +73,11 @@ AND Password = '$Password'";
 
  <a href="index.php?page=home">Home</a>  |
 
- <a href="index.php?page=add_users"> Add Users</a>  |
+ <a href="index.php?page=add_users"> Your To-Do lists</a>  |
 
- <a href="index.php?page=add_schedule">Add Schedules </a>  |
+ <a href="index.php?page=add_schedule">Add Sticky Notes </a>  |
 
- <a href="index.php?page=add_teacher"> Add Teachers </a>  |
+ <a href="index.php?page=add_teacher"> Search </a>  |
 
  <a href="index.php?page=add_program"> Add Programs </a> |
 
