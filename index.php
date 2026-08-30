@@ -241,7 +241,6 @@ if (isset($_POST['login_submit'])) {
 
 
 
-
 <footer>
 
     <p>Stationery Reminder</p>
