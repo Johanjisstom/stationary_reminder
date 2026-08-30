@@ -1,198 +1,268 @@
-<?php 
+<?php
 
-session_start(); 
+session_start();
 
-include("connect.php"); 
+include("connect.php");
 
-$page = isset($_GET['page']) ? $_GET['page'] : 'Home'; 
+$page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
-$login_error = ""; 
+$login_error = "";
 
-if (isset($_POST['login_submit'])) { 
 
- $User_name = $_POST['User_name']; 
+/* ======================================================
+   LOGIN SYSTEM
+   ====================================================== */
 
- $Password = $_POST['Password']; 
+if (isset($_POST['login_submit'])) {
 
- $sql = "SELECT * FROM users  
+    $User_name = $_POST['User_name'];
+    $Password = $_POST['Password'];
 
- WHERE User_name = '$User_name'  
+    $stmt = $conn->prepare(
+        "SELECT * FROM Users WHERE User_name = ?"
+    );
 
-AND Password = '$Password'"; 
+    $stmt->bind_param("s", $User_name);
 
- $result = mysqli_query($conn, $sql); 
+    $stmt->execute();
 
- if (mysqli_num_rows($result) == 1) { 
+    $result = $stmt->get_result();
 
- $row = mysqli_fetch_assoc($result); 
+    if (mysqli_num_rows($result) == 1) {
 
- $_SESSION['UserID'] = $row['UserID']; 
+        $row = mysqli_fetch_assoc($result);
 
- $_SESSION['User_name'] = $row['User_name']; 
+        if (password_verify($Password, $row['Password'])) {
 
- header("Location: index.php"); 
+            $_SESSION['UserID'] = $row['UserID'];
+            $_SESSION['User_name'] = $row['User_name'];
 
- exit(); 
+            header("Location: index.php");
 
- } else { 
+            exit();
 
- $login_error = "Invalid username or password."; 
+        } else {
 
- } 
+            $login_error = "Invalid username or password.";
 
-} 
+        }
 
-?> 
+    } else {
 
- 
+        $login_error = "Invalid username or password.";
 
-<!DOCTYPE html> 
+    }
 
-<html> 
+}
 
-<head> 
 
-<link rel="stylesheet" href="style.css"> 
-<title>Welcome to Stationary Reminder</title>
-</head> 
+/* ======================================================
+   HTML
+   ====================================================== */
 
-<body> 
-<h1>Welcome to the Stationary Reminder.</h1>
+?>
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <link rel="stylesheet" href="style.css">
+
+    <title>Stationery Reminder</title>
+
+</head>
+
+
+<body>
+
+
+<!-- ==================================================
+     HERO SECTION
+     ================================================== -->
+
+<div class="hero_image">
+
+    <h1>Stationery Reminder</h1>
+
 </div>
- 
-<div class="main-layout">  
-
-
- <?php if (isset($_SESSION['User_name'])) { ?> 
 
 
 
- <div class="navigation-add">  
+<!-- ==================================================
+     MAIN NAVIGATION
+     ================================================== -->
 
- <nav> 
+<?php if (isset($_SESSION['User_name'])) { ?>
 
- <a href="index.php?page=home">Home</a>  |
+    <div class="navigation-add">
 
- <a href="index.php?page=add_users"> Your To-Do lists</a>  |
+        <nav>
 
- <a href="index.php?page=add_schedule">Add Sticky Notes </a>  |
+            <a href="index.php?page=home">
+                Home
+            </a>
 
- <a href="index.php?page=add_teacher"> Search </a>  |
+            <a href="index.php?page=to_dolists">
+                To-Do Lists
+            </a>
 
- <a href="index.php?page=add_program"> Add Programs </a> |
+            <a href="index.php?page=sticky_notes">
+                Sticky Notes
+            </a>
 
- <a href="index.php?page=logout">Logout</a> 
- 
- </nav> 
- </div> 
- <?php } ?> 
+            <a href="index.php?page=stationery_checklist">
+                Stationery Checklist
+            </a>
+
+            <a href="index.php?page=search">
+                Search
+            </a>
+
+            <a href="index.php?page=profile">
+                Profile
+            </a>
+
+            <a href="index.php?page=logout">
+                Logout
+            </a>
+
+        </nav>
+
+    </div>
+
+
+<?php } else { ?>
+
+
+    <div class="navigation-add">
+
+        <nav>
+
+            <a href="index.php?page=home">
+                Home
+            </a>
+
+            <a href="index.php?page=login">
+                Login
+            </a>
+
+            <a href="index.php?page=signup">
+                Sign Up
+            </a>
+
+        </nav>
+
+    </div>
+
+
+<?php } ?>
+
 
 <br>
-<br>
-
-<nav>
-
- 
-      <a href="index.php?page=home">Home</a> | 
-
- 
-      <a href="index.php?page=view_users">Users</a> | 
-    
- 
-      <a href="index.php?page=view_schedule">Schedules</a> | 
-
- 
-      <a href="index.php?page=view_teacher">Teachers</a> | 
-
- 
-      <a href="index.php?page=view_program">Programs</a> | 
-
-      
-      <a href="index.php?page=login">Login</a> 
 
 
- </nav> 
-
- <hr> 
-
- <div class="content"> 
-
-      <?php 
-
-      if (isset($_GET['page'])) { 
-
-      $page = $_GET['page']; 
-
-      if ($page == "add_teacher.php") { 
-
-         include("add_teacher.php");
-
-      } elseif ($page == "add_schedule") { 
-
-         include("add_schedule.php"); 
-
-      } elseif ($page == "add_users") { 
-
-         include("add_users.php"); 
-
-      } elseif ($page == "add_program") { 
-
-         include("add_program.php"); 
+<div class="main-layout">
 
 
-       #-----------------------------------------
-
-      } elseif ($page == "view_teacher") { 
-
-       include("view_teacher.php");
-         
-          } elseif ($page == "view_schedule") { 
-         
-          include("view_schedule.php"); 
-         
-          } elseif ($page == "view_program") { 
-         
-          include("view_program.php"); 
-         
-          } elseif ($page == "view_users") { 
-         
-          include("view_users.php"); 
-
-      
-         }elseif ($page == "login") { 
-             include("login.php"); 
+    <div class="content">
 
 
-         }elseif ($page == "logout") { 
-               include("logout.php"); 
-      
-      
-         } else { 
-
-         include("home.php"); 
-      } 
-      
-
-      } else { 
-
-      include("home.php"); 
-
-      } 
+        <?php
 
 
-      
-      ?> 
+        
+        if ($page == "home") {
 
- </div> 
- 
+            include("home.php");
 
 
- <footer>
-  <p>Stationary Reminder</p>
+        
+
+        } elseif ($page == "login") {
+
+            include("login.php");
+
+
+
+        } elseif ($page == "signup") {
+
+            include("signup.php");
+
+
+        
+
+        } elseif ($page == "to_dolists") {
+
+            include("to_do_list.php");
+
+
+        
+
+        } elseif ($page == "sticky_notes") {
+
+            include("sticky_notes.php");
+
+
+        
+
+        } elseif ($page == "stationery_checklist") {
+
+            include("stationery_checklist.php");
+
+
+        
+
+        } elseif ($page == "search") {
+
+            include("search.php");
+
+
+
+        } elseif ($page == "profile") {
+
+            include("profile.php");
+
+
+
+
+        } elseif ($page == "logout") {
+
+            include("logout.php");
+
+
+        
+        } else {
+
+            include("home.php");
+
+        }
+
+
+        ?>
+
+
+    </div>
+
+
+</div>
+
+
+
+
+<footer>
+
+    <p>Stationery Reminder</p>
+
+    <p>
+        Helping students remember their school equipment
+        and organise their tasks.
+    </p>
+
 </footer>
 
 
-</body> 
+</body>
 
-</html> 
-
+</html>
