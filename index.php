@@ -92,19 +92,19 @@ if (isset($_POST['login_submit'])) {
         <nav>
 
             <a href="index.php?page=home">
-                Home
+                Home |
             </a>
 
             <a href="index.php?page=to_dolists">
-                To-Do Lists
+                To-Do Lists |
             </a>
 
             <a href="index.php?page=sticky_notes">
-                Sticky Notes
+                Sticky Notes |
             </a>
 
             <a href="index.php?page=stationery_checklist">
-                Stationery Checklist
+                Stationery Checklist |
             </a>
 
             <a href="index.php?page=search">
