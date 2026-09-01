@@ -132,15 +132,15 @@ if (isset($_POST['login_submit'])) {
         <nav>
 
             <a href="index.php?page=home">
-                Home
+                Home |
             </a>
 
             <a href="index.php?page=login">
-                Login
+                Login |
             </a>
 
             <a href="index.php?page=signup">
-                Sign Up
+                Sign Up |
             </a>
 
         </nav>
