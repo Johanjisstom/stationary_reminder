@@ -2,22 +2,28 @@
 
 if (isset($_POST['signup_submit'])) {
 
-    $Username = $_POST['Username'];
-    $Email = $_POST['Email'];
+    $User_name = trim($_POST['User_name']);
+    $User_email = trim($_POST['User_email']);
     $Password = $_POST['Password'];
     $ConfirmPassword = $_POST['ConfirmPassword'];
 
-
-    if ($Password != $ConfirmPassword) {
+    
+    if ($Password !== $ConfirmPassword) {
 
         echo "<p>Passwords do not match.</p>";
 
     } else {
 
-       
-        $check_sql = "SELECT * FROM Users WHERE Email = ?";
+
+        $check_sql = "SELECT * FROM users WHERE User_email = ?";
+
         $check_stmt = $conn->prepare($check_sql);
-        $check_stmt->bind_param("s", $Email);
+
+        if (!$check_stmt) {
+            die("Database error: " . $conn->error);
+        }
+
+        $check_stmt->bind_param("s", $User_email);
         $check_stmt->execute();
 
         $result = $check_stmt->get_result();
@@ -28,25 +34,39 @@ if (isset($_POST['signup_submit'])) {
 
         } else {
 
-     
-            $hashed_password = password_hash($Password, PASSWORD_DEFAULT);
 
-            $sql = "INSERT INTO Users (Username, Email, Password)
+            $hashed_password = password_hash(
+                $Password,
+                PASSWORD_DEFAULT
+            );
+
+
+            $sql = "INSERT INTO users
+                    (User_name, User_email, Password)
                     VALUES (?, ?, ?)";
 
             $stmt = $conn->prepare($sql);
 
+            if (!$stmt) {
+                die("Database error: " . $conn->error);
+            }
+
             $stmt->bind_param(
                 "sss",
-                $Username,
-                $Email,
+                $User_name,
+                $User_email,
                 $hashed_password
             );
 
             if ($stmt->execute()) {
 
                 echo "<p>Account created successfully!</p>";
-                echo "<a href='index.php?page=login'>Login here</a>";
+
+                echo "<p>
+                        <a href='index.php?page=login'>
+                            Login here
+                        </a>
+                      </p>";
 
             } else {
 
@@ -60,53 +80,62 @@ if (isset($_POST['signup_submit'])) {
         $check_stmt->close();
     }
 }
-
 ?>
 
 <h2>Create an Account</h2>
 
-<form method="POST">
+<form method="POST" action="">
 
-    <label>Username:</label>
-    <input
-        type="text"
-        name="Username"
-        required
-    >
+    <p>
+        <label for="User_name">Username:</label><br>
 
-    <br><br>
+        <input
+            type="text"
+            id="User_name"
+            name="User_name"
+            required
+        >
+    </p>
 
-    <label>Email:</label>
-    <input
-        type="email"
-        name="Email"
-        required
-    >
+    <p>
+        <label for="User_email">Email:</label><br>
 
-    <br><br>
+        <input
+            type="email"
+            id="User_email"
+            name="User_email"
+            required
+        >
+    </p>
 
-    <label>Password:</label>
-    <input
-        type="password"
-        name="Password"
-        required
-    >
+    <p>
+        <label for="Password">Password:</label><br>
 
-    <br><br>
+        <input
+            type="password"
+            id="Password"
+            name="Password"
+            required
+        >
+    </p>
 
-    <label>Confirm Password:</label>
-    <input
-        type="password"
-        name="ConfirmPassword"
-        required
-    >
+    <p>
+        <label for="ConfirmPassword">Confirm Password:</label><br>
 
-    <br><br>
+        <input
+            type="password"
+            id="ConfirmPassword"
+            name="ConfirmPassword"
+            required
+        >
+    </p>
 
-    <input
-        type="submit"
-        name="signup_submit"
-        value="Sign Up"
-    >
+    <p>
+        <input
+            type="submit"
+            name="signup_submit"
+            value="Sign Up"
+        >
+    </p>
 
 </form>
