@@ -1,0 +1,423 @@
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: white;
+    color: #111;
+}
+
+
+
+.hero_image {
+    height: 120px;
+    background-color: #243bd3;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    position: relative;
+}
+
+.hero_image h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: normal;
+    text-transform: uppercase;
+}
+
+.hero_image p {
+    margin: 5px 0 0;
+    font-size: 13px;
+}
+
+
+
+.welcome-bar {
+    height: 28px;
+    background-color: #c7bb16;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 15px;
+}
+
+
+
+.main-layout {
+    display: flex;
+    min-height: 418px;
+}
+
+
+
+.navigation {
+    width: 160px;
+    background-color: #ffffff;
+
+    border-right: 10px solid #063c55;
+
+    padding-top: 20px;
+    text-align: center;
+}
+
+.navigation a {
+    display: block;
+
+    color: #3c9ed0;
+    text-decoration: none;
+
+    font-size: 20px;
+    line-height: 1.2;
+
+    margin: 18px 5px;
+}
+
+.navigation a:hover {
+    color: #063c55;
+}
+
+/* Website title inside navigation */
+
+.navigation-title {
+    color: #3c9ed0;
+    font-size: 20px;
+
+    margin: 5px 10px 25px;
+
+    line-height: 1.2;
+}
+
+/* ---------- MAIN CONTENT ---------- */
+
+.content {
+    flex: 1;
+
+    padding: 28px 25px;
+
+    background-color: white;
+}
+
+/* ---------- SECTION HEADINGS ---------- */
+
+.content h2 {
+    display: inline-block;
+
+    margin: 0 10px 10px 0;
+
+    font-size: 20px;
+    font-weight: normal;
+}
+
+/* ---------- ADD BUTTONS ---------- */
+
+button,
+.add-button,
+.content input[type="submit"] {
+    background-color: #d8d8d8;
+
+    border: none;
+
+    padding: 8px 12px;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+button:hover,
+.add-button:hover,
+.content input[type="submit"]:hover {
+    background-color: #c5c5c5;
+}
+
+/* ---------- DASHBOARD ---------- */
+
+.dashboard {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 25px;
+
+    max-width: 700px;
+
+    margin: 0 auto;
+}
+
+/* ---------- STICKY NOTES ---------- */
+
+.sticky-notes {
+    margin-bottom: 45px;
+}
+
+.sticky-note {
+    display: inline-flex;
+
+    width: 230px;
+    min-height: 85px;
+
+    margin: 5px 15px 5px 0;
+
+    background-color: #d7d7d7;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 15px;
+
+    font-size: 19px;
+}
+
+/* ---------- TO-DO LIST ---------- */
+
+.todo-section {
+    width: 48%;
+
+    display: inline-block;
+
+    vertical-align: top;
+}
+
+.todo-list {
+    background-color: #d7d7d7;
+
+    min-height: 155px;
+
+    padding: 12px 20px;
+
+    font-size: 19px;
+}
+
+.todo-list p {
+    margin: 5px 0;
+}
+
+/* ---------- STATIONERY CHECKLIST ---------- */
+
+.stationery-section {
+    width: 48%;
+
+    display: inline-block;
+
+    vertical-align: top;
+
+    margin-left: 2%;
+}
+
+.stationery-checklist {
+    background-color: #d7d7d7;
+
+    min-height: 155px;
+
+    padding: 12px 20px;
+
+    font-size: 19px;
+}
+
+.stationery-checklist p {
+    margin: 5px 0;
+}
+
+/* ---------- CARDS ---------- */
+
+.card {
+    background-color: #d7d7d7;
+
+    padding: 20px;
+
+    margin-bottom: 20px;
+}
+
+/* ---------- FORMS ---------- */
+
+form {
+    max-width: 500px;
+}
+
+label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 16px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+
+    padding: 10px;
+
+    margin-bottom: 15px;
+
+    border: 1px solid #aaa;
+
+    font-size: 15px;
+}
+
+textarea {
+    min-height: 100px;
+
+    resize: vertical;
+}
+
+/* ---------- TABLES ---------- */
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    margin-top: 15px;
+}
+
+th,
+td {
+    border: 1px solid #aaa;
+
+    padding: 10px;
+
+    text-align: left;
+}
+
+th {
+    background-color: #d7d7d7;
+}
+
+/* ---------- LINKS ---------- */
+
+a {
+    color: #298fc2;
+}
+
+a:hover {
+    color: #063c55;
+}
+
+/* ---------- FOOTER ---------- */
+
+footer {
+    height: 28px;
+
+    background-color: #c7bb16;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 14px;
+
+    color: #111;
+}
+
+/* ---------- LOGIN / SIGN UP ---------- */
+
+.login-container,
+.signup-container {
+    width: 400px;
+
+    max-width: 90%;
+
+    margin: 30px auto;
+
+    padding: 25px;
+
+    background-color: #f2f2f2;
+}
+
+.login-container h2,
+.signup-container h2 {
+    text-align: center;
+
+    font-weight: normal;
+}
+
+/* ---------- SEARCH ---------- */
+
+.search-box {
+    display: flex;
+
+    gap: 10px;
+
+    margin-bottom: 25px;
+}
+
+.search-box input {
+    flex: 1;
+
+    margin-bottom: 0;
+}
+
+/* ---------- MOBILE ---------- */
+
+@media screen and (max-width: 700px) {
+
+    .hero_image {
+        height: 100px;
+    }
+
+    .hero_image h1 {
+        font-size: 21px;
+    }
+
+    .main-layout {
+        flex-direction: column;
+    }
+
+    .navigation {
+        width: 100%;
+
+        border-right: none;
+        border-bottom: 8px solid #063c55;
+
+        padding: 10px;
+    }
+
+    .navigation a {
+        display: inline-block;
+
+        font-size: 16px;
+
+        margin: 8px 10px;
+    }
+
+    .content {
+        padding: 20px 15px;
+    }
+
+    .sticky-note {
+        width: 100%;
+
+        margin-right: 0;
+    }
+
+    .todo-section,
+    .stationery-section {
+        width: 100%;
+
+        margin: 0 0 20px 0;
+    }
+
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+}
