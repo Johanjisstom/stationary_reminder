@@ -1,21 +1,47 @@
 <?php
 
+
+require_once("connect.php");
+
+$message = "";
+
 if (isset($_POST['signup_submit'])) {
 
+   
     $User_name = trim($_POST['User_name']);
     $User_email = trim($_POST['User_email']);
     $Password = $_POST['Password'];
     $ConfirmPassword = $_POST['ConfirmPassword'];
 
+    if (
+        empty($User_name) ||
+        empty($User_email) ||
+        empty($Password) ||
+        empty($ConfirmPassword)
+    ) {
+
+        $message = "Please fill in all fields.";
+
+    }
+
     
-    if ($Password !== $ConfirmPassword) {
+    elseif ($Password !== $ConfirmPassword) {
 
-        echo "<p>Passwords do not match.</p>";
+        $message = "The passwords do not match.";
 
-    } else {
+    }
 
+   
+    elseif (!filter_var($User_email, FILTER_VALIDATE_EMAIL)) {
 
-        $check_sql = "SELECT * FROM users WHERE User_email = ?";
+        $message = "Please enter a valid email address.";
+
+    }
+
+    else {
+
+       
+        $check_sql = "SELECT UserID FROM users WHERE User_email = ?";
 
         $check_stmt = $conn->prepare($check_sql);
 
@@ -24,26 +50,31 @@ if (isset($_POST['signup_submit'])) {
         }
 
         $check_stmt->bind_param("s", $User_email);
+
         $check_stmt->execute();
 
-        $result = $check_stmt->get_result();
+        $check_stmt->store_result();
 
-        if ($result->num_rows > 0) {
+        if ($check_stmt->num_rows > 0) {
 
-            echo "<p>This email is already registered.</p>";
+            $message = "An account with this email already exists.";
 
-        } else {
+        }
 
+        else {
 
+           
             $hashed_password = password_hash(
                 $Password,
                 PASSWORD_DEFAULT
             );
 
+            $Role = "student";
 
+          
             $sql = "INSERT INTO users
-                    (User_name, User_email, Password)
-                    VALUES (?, ?, ?)";
+                    (User_name, User_email, Password, Role)
+                    VALUES (?, ?, ?, ?)";
 
             $stmt = $conn->prepare($sql);
 
@@ -52,25 +83,22 @@ if (isset($_POST['signup_submit'])) {
             }
 
             $stmt->bind_param(
-                "sss",
+                "ssss",
                 $User_name,
                 $User_email,
-                $hashed_password
+                $hashed_password,
+                $Role
             );
 
             if ($stmt->execute()) {
 
-                echo "<p>Account created successfully!</p>";
+                $message = "Account created successfully!";
 
-                echo "<p>
-                        <a href='index.php?page=login'>
-                            Login here
-                        </a>
-                      </p>";
+            }
 
-            } else {
+            else {
 
-                echo "<p>There was an error creating your account.</p>";
+                $message = "There was an error creating your account.";
 
             }
 
@@ -80,9 +108,18 @@ if (isset($_POST['signup_submit'])) {
         $check_stmt->close();
     }
 }
+
 ?>
 
 <h2>Create an Account</h2>
+
+<?php
+
+if (!empty($message)) {
+    echo "<p>" . htmlspecialchars($message) . "</p>";
+}
+
+?>
 
 <form method="POST" action="">
 
@@ -97,6 +134,7 @@ if (isset($_POST['signup_submit'])) {
         >
     </p>
 
+
     <p>
         <label for="User_email">Email:</label><br>
 
@@ -107,6 +145,7 @@ if (isset($_POST['signup_submit'])) {
             required
         >
     </p>
+
 
     <p>
         <label for="Password">Password:</label><br>
@@ -119,6 +158,7 @@ if (isset($_POST['signup_submit'])) {
         >
     </p>
 
+
     <p>
         <label for="ConfirmPassword">Confirm Password:</label><br>
 
@@ -130,6 +170,7 @@ if (isset($_POST['signup_submit'])) {
         >
     </p>
 
+
     <p>
         <input
             type="submit"
@@ -139,3 +180,8 @@ if (isset($_POST['signup_submit'])) {
     </p>
 
 </form>
+
+<p>
+    Already have an account?
+    <a href="index.php?page=login">Login here</a>
+</p>
