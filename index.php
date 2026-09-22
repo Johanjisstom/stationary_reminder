@@ -246,8 +246,7 @@ if (isset($_POST['login_submit'])) {
     <p>Stationery Reminder</p>
 
     <p>
-        Helping students remember their school equipment
-        and organise their tasks.
+        Welcome to the Stationery Reminder, where you can store your to- do lists, sticky notes etc.
     </p>
 
 </footer>
