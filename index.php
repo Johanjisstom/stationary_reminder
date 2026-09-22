@@ -108,15 +108,15 @@ if (isset($_POST['login_submit'])) {
             </a>
 
             <a href="index.php?page=search">
-                Search
+                Search |
             </a>
 
             <a href="index.php?page=profile">
-                Profile
+                Profile |
             </a>
 
             <a href="index.php?page=logout">
-                Logout
+                Logout 
             </a>
 
         </nav>
