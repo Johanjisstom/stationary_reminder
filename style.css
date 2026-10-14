@@ -535,3 +535,85 @@ footer {
         padding: 18px;
     }
 }
+
+
+/* Sticky Notes page */
+.sticky-notes-page {
+    padding: 24px;
+}
+
+.sticky-notes-page h2 {
+    margin-bottom: 20px;
+}
+
+.sticky-note-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 500px;
+    margin-bottom: 30px;
+}
+
+.sticky-note-form input,
+.sticky-note-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font: inherit;
+}
+
+.sticky-note-form button,
+.delete-note-button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 5px;
+    background: #2939d5;
+    color: white;
+    cursor: pointer;
+}
+
+.sticky-notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+}
+
+.sticky-note-card {
+    padding: 18px;
+    background: #fff3a6;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    overflow-wrap: anywhere;
+}
+
+.sticky-note-card h3 {
+    margin-top: 0;
+}
+
+.sticky-note-card p {
+    white-space: normal;
+    line-height: 1.5;
+}
+
+.sticky-note-card small {
+    display: block;
+    margin: 12px 0;
+}
+
+.sticky-message {
+    padding: 10px;
+    background: #eef0ff;
+    border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+    .sticky-notes-page {
+        padding: 14px;
+    }
+
+    .sticky-notes-grid {
+        grid-template-columns: 1fr;
+    }
+}
