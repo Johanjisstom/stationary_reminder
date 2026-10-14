@@ -1,139 +1,192 @@
-<?php include ('index.php')?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sticky Note App</title>
+<?php
+// sticky_notes.php
+// index.php should start the session and include connect.php.
 
-    <!-- Style CSS -->
-    <link rel="stylesheet" href="./assets/style.css">
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+// Check that the user is logged in.
+if (!isset($_SESSION['UserID'])) {
+    echo "<p>Please log in to view your sticky notes.</p>";
+    exit;
+}
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-</head>
-<body>
+$userID = (int) $_SESSION['UserID'];
+$message = "";
 
-    <nav class="navbar navbar-expand-lg navbar-light ">
-        <a class="navbar-brand ml-4" href="#">Sticky Notes App</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse ml-4" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-            <a class="nav-link" href="" data-toggle="modal" data-target="#addNoteModal">Add Note</a>
-            </div>
-        </div>
-    </nav>
+// Check the database connection.
+if (!isset($conn) || !($conn instanceof mysqli)) {
+    die("Database connection error. Please check connect.php.");
+}
 
-    <!-- Add Note Modal -->
-    <div class="modal fade mt-5" id="addNoteModal" tabindex="-1" aria-labelledby="addNote" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addNote">Add Note</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="./endpoint/add-note.php" method="POST">
-                        <div class="form-group">
-                            <label for="noteTitle">Note Title</label>
-                            <input type="text" class="form-control" id="noteTitle" name="note_title">
-                        </div>
-                        <div class="form-group">
-                            <label for="noteContent">Note</label>
-                            <textarea class="form-control" name="note_content" id="noteContent" cols="30" rows="10"></textarea>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-dark">Save changes</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+// Add a sticky note.
+if ($_SERVER["REQUEST_METHOD"] === "POST"
+    && isset($_POST["add_note"])) {
 
-    <!-- View Note Modal -->
-    <div class="modal fade mt-5" id="viewNoteModal" tabindex="-1" aria-labelledby="viewNote" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content note-modal">
+    $title = trim($_POST["note_title"] ?? "");
+    $content = trim($_POST["note_content"] ?? "");
 
-                <div class="modal-body">
-                    <div class="header row">
-                        <h1 class="modal-title ml-4" id="viewNote" style="width:83%">Note</h1>
+    if ($title === "") {
+        $message = "Please enter a title for your sticky note.";
+    } else {
+        $stmt = $conn->prepare(
+            "INSERT INTO sticky_notes (UserID, NoteTitle, NoteContent)
+             VALUES (?, ?, ?)"
+        );
 
-                        <div class="btn-group mr-2 float-right" role="group" aria-label="First group">
-                            <button type="button" class="btn" id="editModal"><i class="fa-solid fa-pencil"></i></button>
-                        </div>
-                    </div>
+        if ($stmt) {
+            $stmt->bind_param("iss", $userID, $title, $content);
 
-                    <div class="view-note-content">
-                        <form action="./endpoint/update-note.php" method="POST">
-                            <input type="text" class="form-control" id="noteModalID" name="tbl_note_id" hidden>
-                            <div class="form-group">
-                                <label for="noteModalTitle">Title:</label>
-                                <input type="text" class="form-control" id="noteModalTitle" name="note_title" style="border:none;" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label for="noteModalContent">Content:</label>
-                                <textarea class="form-control" name="note_content" id="noteModalContent" cols="30" rows="8" style="border: none;" readonly></textarea>
-                            </div>
-                            <small class="float-right" id="datePosted"></small>
-                            <div class="float-right" id="edit-buttons" style="display:none">
-                                <button type="button" class="btn btn-secondary edit-button" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-dark edit-button">Save changes</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="main row">
+            if ($stmt->execute()) {
+                $message = "Sticky note added successfully.";
+            } else {
+                $message = "Could not save the sticky note.";
+            }
 
-        <?php
-        
-        $stmt = $conn->prepare("SELECT * FROM `tbl_note`");
-        $stmt->execute();
-        $result = $stmt->fetchAll();
-
-        foreach ($result as $row) {
-            $noteID = $row["tbl_note_id"];
-            $noteTitle = $row["note_title"];
-            $noteContent = $row["note_content"];
-            $datePosted = $row["date_posted"];
-        
-            ?>
-
-            <div class="note-container" onclick="viewNote(<?= $noteID ?>)">
-            <button type="button" class="btn float-right mt-2 mr-2" id="deleteModal"><i class="fa-solid fa-x" onclick="deleteNote(<?= $noteID ?>)"></i></button>
-                <div class="note-content">
-                    <p id="noteID-<?= $noteID ?>" hidden><?= $noteID ?></p>
-                    <p id="noteTitle-<?= $noteID ?>" hidden><?= $noteTitle ?></p>
-                    <p id="noteContent-<?= $noteID ?>"><?= $noteContent ?></p>
-                    <p id="datePosted-<?= $noteID ?>" hidden><?= $datePosted ?></p>
-                </div>
-            </div>
-            <?php 
+            $stmt->close();
+        } else {
+            $message = "Could not prepare the database query.";
         }
-        ?>
+    }
+}
+
+// Delete a sticky note belonging to this user.
+if ($_SERVER["REQUEST_METHOD"] === "POST"
+    && isset($_POST["delete_note"])) {
+
+    $noteID = filter_input(
+        INPUT_POST,
+        "note_id",
+        FILTER_VALIDATE_INT
+    );
+
+    if ($noteID) {
+        $stmt = $conn->prepare(
+            "DELETE FROM sticky_notes
+             WHERE NoteID = ? AND UserID = ?"
+        );
+
+        if ($stmt) {
+            $stmt->bind_param("ii", $noteID, $userID);
+            $stmt->execute();
+            $stmt->close();
+
+            $message = "Sticky note deleted if it belonged to your account.";
+        }
+    }
+}
+
+// Retrieve this user's sticky notes.
+$stmt = $conn->prepare(
+    "SELECT NoteID, NoteTitle, NoteContent, CreatedDate
+     FROM sticky_notes
+     WHERE UserID = ?
+     ORDER BY NoteID DESC"
+);
+
+$notes = [];
+
+if ($stmt) {
+    $stmt->bind_param("i", $userID);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        $notes[] = $row;
+    }
+
+    $stmt->close();
+}
+?>
+
+<div class="sticky-notes-page">
+    <h2>My Sticky Notes</h2>
+
+    <?php if ($message !== ""): ?>
+        <p class="sticky-message">
+            <?= htmlspecialchars($message, ENT_QUOTES, "UTF-8") ?>
+        </p>
+    <?php endif; ?>
+
+    <form method="post"
+          action="index.php?page=sticky_notes"
+          class="sticky-note-form">
+
+        <label for="note_title">Note title</label>
+        <input
+            type="text"
+            id="note_title"
+            name="note_title"
+            maxlength="150"
+            required
+        >
+
+        <label for="note_content">Note</label>
+        <textarea
+            id="note_content"
+            name="note_content"
+            rows="4"
+            placeholder="Write a reminder..."
+        ></textarea>
+
+        <button type="submit" name="add_note" value="1">
+            + Add Sticky Note
+        </button>
+    </form>
+
+    <div class="sticky-notes-grid">
+        <?php if (count($notes) === 0): ?>
+            <p>You have no sticky notes yet. Add one above!</p>
+        <?php else: ?>
+            <?php foreach ($notes as $note): ?>
+                <article class="sticky-note-card">
+                    <h3>
+                        <?= htmlspecialchars(
+                            $note["NoteTitle"],
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>
+                    </h3>
+
+                    <p><?= nl2br(htmlspecialchars(
+                        $note["NoteContent"] ?? "",
+                        ENT_QUOTES,
+                        "UTF-8"
+                    )) ?></p>
+
+                    <?php if (!empty($note["CreatedDate"])): ?>
+                        <small>
+                            Created:
+                            <?= htmlspecialchars(
+                                $note["CreatedDate"],
+                                ENT_QUOTES,
+                                "UTF-8"
+                            ) ?>
+                        </small>
+                    <?php endif; ?>
+
+                    <form method="post"
+                          action="index.php?page=sticky_notes"
+                          onsubmit="return confirm('Delete this sticky note?');">
+
+                        <input
+                            type="hidden"
+                            name="note_id"
+                            value="<?= (int) $note["NoteID"] ?>"
+                        >
+
+                        <button type="submit"
+                                name="delete_note"
+                                value="1"
+                                class="delete-note-button">
+                            Delete
+                        </button>
+                    </form>
+                </article>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
-
-
-    <!-- BootStrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
-
-    <!-- Script JS -->
-    <script src="./assets/script.js"></script>
-</body>
-</html>
+</div>
