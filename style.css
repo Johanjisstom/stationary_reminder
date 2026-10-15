@@ -43,7 +43,7 @@ body {
 
 .welcome-bar {
     height: 28px;
-    background-color: #c7bb16;
+    background-color: #d9ce2a;
 
     display: flex;
     align-items: center;
@@ -74,7 +74,7 @@ body {
 .navigation a {
     display: block;
 
-    color: #3c9ed0;
+    color: #318bb8;
     text-decoration: none;
 
     font-size: 20px;
