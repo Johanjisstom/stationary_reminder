@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST"
         $message = "Please enter a title for your sticky note.";
     } else {
         $stmt = $conn->prepare(
-            "INSERT INTO sticky_notes (UserID, Note_title, NoteContent)
+            "INSERT INTO sticky_notes (UserID, Note_title, Note_content)
              VALUES (?, ?, ?)"
         );
 
