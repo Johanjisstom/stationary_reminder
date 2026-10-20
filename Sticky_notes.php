@@ -145,23 +145,23 @@ if ($stmt) {
                 <article class="sticky-note-card">
                     <h3>
                         <?= htmlspecialchars(
-                            $note["NoteTitle"],
+                            $note["Note_title"],
                             ENT_QUOTES,
                             "UTF-8"
                         ) ?>
                     </h3>
 
                     <p><?= nl2br(htmlspecialchars(
-                        $note["NoteContent"] ?? "",
+                        $note["Note_content"] ?? "",
                         ENT_QUOTES,
                         "UTF-8"
                     )) ?></p>
 
-                    <?php if (!empty($note["CreatedDate"])): ?>
+                    <?php if (!empty($note["Created_date"])): ?>
                         <small>
                             Created:
                             <?= htmlspecialchars(
-                                $note["CreatedDate"],
+                                $note["Created_date"],
                                 ENT_QUOTES,
                                 "UTF-8"
                             ) ?>
