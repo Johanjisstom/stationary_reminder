@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST"
 
 // Retrieve this user's sticky notes.
 $stmt = $conn->prepare(
-    "SELECT NoteID, NoteTitle, NoteContent, CreatedDate
+    "SELECT NoteID, Note_title, Note_content, Created_date
      FROM sticky_notes
      WHERE UserID = ?
      ORDER BY NoteID DESC"
