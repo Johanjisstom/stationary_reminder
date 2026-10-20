@@ -198,9 +198,9 @@ if (isset($_POST['login_submit'])) {
 
         
 
-        } elseif ($page == "stationery_checklist") {
+        } elseif ($page == "stationerychecklist") {
 
-            include("stationery_checklist.php");
+            include("stationerychecklist.php");
 
 
         
