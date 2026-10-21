@@ -193,7 +193,7 @@ if (isset($_POST['login_submit'])) {
 
         } elseif ($page == "sticky_notes") {
 
-            include("sticky_notes.php");
+            include("sticky_note.php");
 
 
         
