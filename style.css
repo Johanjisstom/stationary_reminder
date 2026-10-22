@@ -667,3 +667,134 @@ margin-top: 0;
 flex-direction: column;
 }
 }
+
+
+
+.checklist-page {
+    max-width: 850px;
+    margin: 35px auto;
+    padding: 25px;
+    font-family: Arial, sans-serif;
+}
+
+.checklist-page h2 {
+    color: #293bd4;
+    font-size: 28px;
+}
+
+.checklist-progress {
+    margin: 25px 0;
+}
+
+.progress-track {
+    height: 12px;
+    margin-top: 10px;
+    overflow: hidden;
+    background: #e5e7eb;
+    border-radius: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #293bd4;
+    border-radius: 10px;
+    transition: width 0.2s ease;
+}
+
+.checklist-add {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.checklist-add input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.checklist-add button {
+    padding: 12px 18px;
+    color: white;
+    background: #293bd4;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.checklist-items {
+    display: grid;
+    gap: 12px;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 15px;
+    background: #f3f4f8;
+    border-radius: 8px;
+}
+
+.checklist-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.checklist-toggle span {
+    overflow-wrap: anywhere;
+}
+
+.check-button {
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: #293bd4;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.packed {
+    color: #777;
+    text-decoration: line-through;
+}
+
+.delete-button {
+    padding: 8px 12px;
+    color: white;
+    background: #c62828;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.checklist-empty {
+    padding: 20px;
+    background: #f3f4f8;
+    border-radius: 8px;
+}
+
+.checklist-error {
+    color: #b00020;
+}
+
+@media (max-width: 500px) {
+    .checklist-page {
+        margin: 15px auto;
+        padding: 15px;
+    }
+
+    .checklist-add {
+        flex-direction: column;
+    }
+
+    .checklist-item {
+        align-items: flex-start;
+    }
+}
