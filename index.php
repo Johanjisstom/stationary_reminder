@@ -103,8 +103,8 @@ if (isset($_POST['login_submit'])) {
                 Sticky Notes |
             </a>
 
-            <a href="index.php?page=stationery_checklist">
-                Stationery Checklist |
+            <a href="index.php?page=stationary_checklist">
+                Stationary Checklist |
             </a>
 
             <a href="index.php?page=search">
