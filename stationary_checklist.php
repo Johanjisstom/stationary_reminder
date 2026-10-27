@@ -10,7 +10,7 @@ if (!isset($_SESSION['UserID'])) {
 
 $userID = (int) $_SESSION['UserID'];
 
-// Create a dedicated table for checklist items if it does not exist.
+
 $conn->query("
     CREATE TABLE IF NOT EXISTS stationery_checklist_items (
         ItemID INT AUTO_INCREMENT PRIMARY KEY,
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Only display checklist items belonging to the logged-in user.
+
 $stmt = $conn->prepare(
     "SELECT ItemID, ItemName, IsPacked
      FROM stationery_checklist_items
