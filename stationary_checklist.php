@@ -119,14 +119,18 @@ $packed = count(array_filter($items, fn($item) => (int)$item['IsPacked'] === 1))
         </div>
     </div>
 
-    <form method="POST" action="index.php?page=stationerychecklist"
-          class="checklist-add">
-        <input type="hidden" name="action" value="add">
-        <input type="text" name="item_name"
-               placeholder="Add stationery (e.g. pen)"
-               maxlength="150" required>
-        <button type="submit">+ Add item</button>
-    </form>
+    <form method="POST" action="index.php?page=stationary_checklist">
+    <input
+        type="text"
+        name="item_name"
+        placeholder="Enter stationery item..."
+        required
+    >
+
+    <button type="submit" name="add_item">
+        + Add item
+    </button>
+</form>
 
     <?php if (empty($items)): ?>
         <p class="checklist-empty">
