@@ -1,129 +1,170 @@
 
 <?php
+// ============================================
+// TO-DO LIST - STATIONERY REMINDER
+// Database table: to_dolist
+// ============================================
 
+// The session is normally started by index.php.
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once __DIR__ . '/connect.php';
 
+// The page key must match the route in index.php.
+$returnPage = 'index.php?page=to_do_list';
+
+// Require login.
 if (!isset($_SESSION['UserID'])) {
+    echo '<div class="todo-page">';
     echo '<h2>Please log in first.</h2>';
     echo '<p><a href="index.php?page=login">Login here</a></p>';
+    echo '</div>';
     return;
 }
 
 $UserID = (int) $_SESSION['UserID'];
-$message = '';
 
+// ============================================
+// PROCESS FORM SUBMISSIONS
+// ============================================
 
-$returnPage = 'index.php?page=to_dolist';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-// Add a task
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_task'])) {
-    $TaskName = trim($_POST['TaskName'] ?? '');
-    $TaskDescription = trim($_POST['TaskDescription'] ?? '');
-    $DueDate = trim($_POST['DueDate'] ?? '');
+    // ----------------------------------------
+    // ADD TASK
+    // ----------------------------------------
+    if (isset($_POST['add_task'])) {
 
-    if ($TaskName === '') {
-        $_SESSION['todo_message'] = 'Please enter a task name.';
-    } else {
-        $sql = "INSERT INTO to_dolist
-                (UserID, TaskName, TaskDescription, DueDate, Completed)
-                VALUES (?, ?, ?, NULLIF(?, ''), 0)";
+        $TaskName = trim($_POST['Task_name'] ?? '');
+        $TaskDescription = trim($_POST['Task_description'] ?? '');
+        $DueDate = trim($_POST['Due_date'] ?? '');
 
-        $stmt = $conn->prepare($sql);
-
-        if (!$stmt) {
-            error_log('To-do insert error: ' . $conn->error);
-            $_SESSION['todo_message'] = 'Could not prepare the task. Please check the database structure.';
+        if ($TaskName === '') {
+            $_SESSION['todo_message'] = 'Please enter a task name.';
         } else {
-            $stmt->bind_param(
-                'isss',
-                $UserID,
-                $TaskName,
-                $TaskDescription,
-                $DueDate
-            );
 
-            if ($stmt->execute()) {
-                $_SESSION['todo_message'] = 'Task added successfully.';
+            // An empty due date is saved as NULL.
+            $sql = "INSERT INTO to_dolist
+                    (UserID, Task_name, Task_description, Due_date, Completed)
+                    VALUES (?, ?, ?, NULLIF(?, ''), 0)";
+
+            $stmt = $conn->prepare($sql);
+
+            if ($stmt) {
+                $stmt->bind_param(
+                    'isss',
+                    $UserID,
+                    $TaskName,
+                    $TaskDescription,
+                    $DueDate
+                );
+
+                if ($stmt->execute()) {
+                    $_SESSION['todo_message'] = 'Task added successfully!';
+                } else {
+                    error_log('Add task error: ' . $stmt->error);
+                    $_SESSION['todo_message'] =
+                        'Unable to add the task. Please check the database.';
+                }
+
+                $stmt->close();
             } else {
-                error_log('To-do insert error: ' . $stmt->error);
-                $_SESSION['todo_message'] = 'Could not add the task. Please check your database fields.';
+                error_log('Prepare add task error: ' . $conn->error);
+                $_SESSION['todo_message'] = 'Unable to prepare the task.';
             }
-
-            $stmt->close();
         }
     }
 
-    header('Location: ' . $returnPage);
-    exit;
-}
+    // ----------------------------------------
+    // MARK TASK AS COMPLETED
+    // ----------------------------------------
+    elseif (isset($_POST['complete_task'])) {
 
+        $TaskID = (int) ($_POST['TaskID'] ?? 0);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_task'])) {
-    $TaskID = (int) ($_POST['TaskID'] ?? 0);
+        $stmt = $conn->prepare(
+            "UPDATE to_dolist
+             SET Completed = 1
+             WHERE TaskID = ? AND UserID = ?"
+        );
 
-    $stmt = $conn->prepare(
-        "UPDATE to_dolist
-         SET Completed = 1
-         WHERE TaskID = ? AND UserID = ?"
-    );
+        if ($stmt) {
+            $stmt->bind_param('ii', $TaskID, $UserID);
+            $stmt->execute();
 
-    if ($stmt) {
-        $stmt->bind_param('ii', $TaskID, $UserID);
-        $stmt->execute();
-        $stmt->close();
+            $_SESSION['todo_message'] =
+                $stmt->affected_rows > 0
+                ? 'Task marked as completed!'
+                : 'Task was not changed. It may already be completed.';
 
-        $_SESSION['todo_message'] = 'Task updated.';
-    } else {
-        error_log('To-do completion error: ' . $conn->error);
-        $_SESSION['todo_message'] = 'Could not update the task.';
+            $stmt->close();
+        } else {
+            error_log('Complete task error: ' . $conn->error);
+            $_SESSION['todo_message'] = 'Unable to complete the task.';
+        }
     }
 
-    header('Location: ' . $returnPage);
-    exit;
-}
+    // ----------------------------------------
+    // DELETE TASK
+    // ----------------------------------------
+    elseif (isset($_POST['delete_task'])) {
 
+        $TaskID = (int) ($_POST['TaskID'] ?? 0);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_task'])) {
-    $TaskID = (int) ($_POST['TaskID'] ?? 0);
+        $stmt = $conn->prepare(
+            "DELETE FROM to_dolist
+             WHERE TaskID = ? AND UserID = ?"
+        );
 
-    $stmt = $conn->prepare(
-        "DELETE FROM to_dolist
-         WHERE TaskID = ? AND UserID = ?"
-    );
+        if ($stmt) {
+            $stmt->bind_param('ii', $TaskID, $UserID);
+            $stmt->execute();
 
-    if ($stmt) {
-        $stmt->bind_param('ii', $TaskID, $UserID);
-        $stmt->execute();
-        $stmt->close();
+            $_SESSION['todo_message'] =
+                $stmt->affected_rows > 0
+                ? 'Task deleted successfully.'
+                : 'Task could not be found.';
 
-        $_SESSION['todo_message'] = 'Task deleted.';
-    } else {
-        error_log('To-do delete error: ' . $conn->error);
-        $_SESSION['todo_message'] = 'Could not delete the task.';
+            $stmt->close();
+        } else {
+            error_log('Delete task error: ' . $conn->error);
+            $_SESSION['todo_message'] = 'Unable to delete the task.';
+        }
     }
 
+    // Redirect after processing the form.
+    // This prevents the form from being submitted again on refresh.
     header('Location: ' . $returnPage);
     exit;
 }
 
+// ============================================
+// GET MESSAGE AFTER REDIRECT
+// ============================================
 
-if (isset($_SESSION['todo_message'])) {
-    $message = $_SESSION['todo_message'];
-    unset($_SESSION['todo_message']);
-}
+$message = $_SESSION['todo_message'] ?? '';
+unset($_SESSION['todo_message']);
 
+// ============================================
+// LOAD THE LOGGED-IN USER'S TASKS
+// ============================================
 
-$sql = "SELECT *
+$sql = "SELECT TaskID, UserID, Task_name, Task_description,
+               Due_date, Completed, Created_date
         FROM to_dolist
         WHERE UserID = ?
-        ORDER BY Completed ASC, DueDate ASC";
+        ORDER BY Completed ASC, Due_date ASC, Created_date DESC";
 
 $stmt = $conn->prepare($sql);
 
 if (!$stmt) {
-    error_log('To-do select error: ' . $conn->error);
-    echo '<div class="todo-page"><p>Could not load your tasks. Please check the database structure.</p></div>';
+    error_log('Load tasks error: ' . $conn->error);
+    echo '<div class="todo-page">';
+    echo '<h2>My To-Do List</h2>';
+    echo '<p>Unable to load your tasks. Please check your database structure.</p>';
+    echo '</div>';
     return;
 }
 
@@ -133,100 +174,208 @@ $result = $stmt->get_result();
 ?>
 
 <div class="todo-page">
-    <h2>To-do List</h2>
+
+    <h2>My To-Do List</h2>
+
+    <p class="todo-intro">
+        Organise your schoolwork and remember important tasks.
+    </p>
 
     <?php if ($message !== ''): ?>
-        <p class="message">
+        <p class="todo-message" role="status">
             <?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?>
         </p>
     <?php endif; ?>
 
-    <div class="card">
+    <!-- ADD TASK FORM -->
+    <section class="todo-card">
+
         <h3>Add a Task</h3>
 
         <form method="POST" action="index.php?page=to_do_list">
-            <label for="TaskName">Task:</label>
+
+            <label for="Task_name">Task name:</label>
+
             <input
                 type="text"
-                id="TaskName"
-                name="TaskName"
+                id="Task_name"
+                name="Task_name"
                 placeholder="e.g. Complete homework"
                 maxlength="255"
                 required
             >
 
-            <label for="TaskDescription">Description:</label>
+            <label for="Task_description">Description:</label>
+
             <textarea
-                id="TaskDescription"
-                name="TaskDescription"
-                placeholder="Add more information about the task..."
+                id="Task_description"
+                name="Task_description"
+                placeholder="Add more information about your task..."
+                rows="4"
             ></textarea>
 
-            <label for="DueDate">Due Date:</label>
-            <input type="date" id="DueDate" name="DueDate">
+            <label for="Due_date">Due date:</label>
 
-            <button type="submit" name="add_task" value="1">
+            <input
+                type="date"
+                id="Due_date"
+                name="Due_date"
+            >
+
+            <button
+                type="submit"
+                name="add_task"
+                value="1"
+                class="todo-add-button"
+            >
                 + Add Task
             </button>
-        </form>
-    </div>
 
-    <h3>My Tasks</h3>
+        </form>
+
+    </section>
+
+    <!-- TASK LIST -->
+    <h3 class="todo-section-title">My Tasks</h3>
 
     <?php if ($result->num_rows > 0): ?>
+
         <div class="todo-list">
+
             <?php while ($task = $result->fetch_assoc()): ?>
-                <div class="todo-item">
+
+                <article class="todo-item">
+
                     <div class="todo-information">
-                        <h3 class="<?= $task['Completed'] ? 'completed-task' : '' ?>">
-                            <?= htmlspecialchars($task['TaskName'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+
+                        <h3 class="<?= (int)$task['Completed'] === 1
+                            ? 'completed-task'
+                            : '' ?>">
+
+                            <?= htmlspecialchars(
+                                $task['Task_name'] ?? '',
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+
                         </h3>
 
-                        <?php if (!empty($task['TaskDescription'])): ?>
-                            <p>
-                                <?= nl2br(htmlspecialchars($task['TaskDescription'], ENT_QUOTES, 'UTF-8')) ?>
+                        <?php if (!empty($task['Task_description'])): ?>
+
+                            <p class="todo-description">
+                                <?= nl2br(htmlspecialchars(
+                                    $task['Task_description'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                )) ?>
                             </p>
+
                         <?php endif; ?>
 
-                        <?php if (!empty($task['DueDate'])): ?>
-                            <p>
+                        <?php if (!empty($task['Due_date'])): ?>
+
+                            <p class="todo-due-date">
                                 <strong>Due:</strong>
-                                <?= htmlspecialchars($task['DueDate'], ENT_QUOTES, 'UTF-8') ?>
+                                <?= htmlspecialchars(
+                                    $task['Due_date'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
                             </p>
+
                         <?php endif; ?>
 
-                        <?php if ($task['Completed']): ?>
-                            <p class="completed-text">✓ Completed</p>
+                        <?php if ((int)$task['Completed'] === 1): ?>
+
+                            <p class="todo-completed-text">
+                                ✓ Completed
+                            </p>
+
+                        <?php else: ?>
+
+                            <p class="todo-pending-text">
+                                In progress
+                            </p>
+
                         <?php endif; ?>
+
                     </div>
 
+                    <!-- TASK ACTION BUTTONS -->
                     <div class="todo-actions">
-                        <?php if (!$task['Completed']): ?>
-                            <form method="POST" action="index.php?page=to_do_list">
-                                <input type="hidden" name="TaskID" value="<?= (int) $task['TaskID'] ?>">
-                                <button type="submit" name="complete_task" value="1">
-                                    Complete
+
+                        <?php if ((int)$task['Completed'] !== 1): ?>
+
+                            <form
+                                method="POST"
+                                action="index.php?page=to_do_list"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="TaskID"
+                                    value="<?= (int)$task['TaskID'] ?>"
+                                >
+
+                                <button
+                                    type="submit"
+                                    name="complete_task"
+                                    value="1"
+                                    class="todo-complete-button"
+                                >
+                                    ✓ Complete
                                 </button>
+
                             </form>
+
                         <?php endif; ?>
 
-                        <form method="POST" action="index.php?page=to_do_list"
-                              onsubmit="return confirm('Delete this task?');">
-                            <input type="hidden" name="TaskID" value="<?= (int) $task['TaskID'] ?>">
-                            <button type="submit" name="delete_task" value="1">
+                        <form
+                            method="POST"
+                            action="index.php?page=to_do_list"
+                            onsubmit="return confirm('Are you sure you want to delete this task?');"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="TaskID"
+                                value="<?= (int)$task['TaskID'] ?>"
+                            >
+
+                            <button
+                                type="submit"
+                                name="delete_task"
+                                value="1"
+                                class="todo-delete-button"
+                            >
                                 Delete
                             </button>
+
                         </form>
+
                     </div>
-                </div>
+
+                </article>
+
             <?php endwhile; ?>
+
         </div>
+
     <?php else: ?>
-        <div class="card">
-            <p>You don't have any tasks yet.</p>
-            <p>Add your first task above!</p>
-        </div>
+
+        <section class="todo-empty-state">
+
+            <h3>No tasks yet!</h3>
+
+            <p>
+                Add your first task above to start organising
+                your schoolwork.
+            </p>
+
+        </section>
+
     <?php endif; ?>
+
 </div>
 
 <?php
