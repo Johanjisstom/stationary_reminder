@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['todo_message'] = 'Please enter a task name.';
         } else {
 
-            // An empty due date is saved as NULL.
+            
             $sql = "INSERT INTO to_dolist
                     (UserID, Task_name, Task_description, Due_date, Completed)
                     VALUES (?, ?, ?, NULLIF(?, ''), 0)";
