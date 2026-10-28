@@ -284,7 +284,7 @@ $result = $stmt->get_result();
 
                     </div>
 
-                    <!-- TASK ACTION BUTTONS -->
+                    
                     <div class="todo-actions">
 
                         <?php if ((int)$task['Completed'] !== 1): ?>
