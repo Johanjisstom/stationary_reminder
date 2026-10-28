@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/connect.php';
 
 
-$returnPage = 'index.php?page=to_do list';
+$returnPage = 'index.php?page=to_dolist';
 
 // Require login.
 if (!isset($_SESSION['UserID'])) {
@@ -140,7 +140,12 @@ $sql = "SELECT TaskID, UserID, Task_name, Task_description,
         WHERE UserID = ?
         ORDER BY Completed ASC, Due_date ASC, Created_date DESC";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare(
+    "SELECT TaskID, UserID, Task_name, Task_description,
+            Due_date, Completed, Created_date
+     FROM to_dolist
+     WHERE UserID = ?"
+);
 
 if (!$stmt) {
     error_log('Load tasks error: ' . $conn->error);
