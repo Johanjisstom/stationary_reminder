@@ -184,7 +184,7 @@ if (isset($_POST['login_submit'])) {
 
         
 
-        } elseif ($page == "to_dolist") {
+        } elseif ($page == "to_do list") {
 
             include("to_dolist.php");
 
