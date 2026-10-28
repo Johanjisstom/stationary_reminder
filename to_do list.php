@@ -170,12 +170,12 @@ $result = $stmt->get_result();
         </p>
     <?php endif; ?>
 
-    <!-- ADD TASK FORM -->
+    
     <section class="todo-card">
 
         <h3>Add a Task</h3>
 
-        <form method="POST" action="index.php?page=to_do_list">
+        <form method="POST" action="index.php?page=to_dolist">
 
             <label for="Task_name">Task name:</label>
 
@@ -291,7 +291,7 @@ $result = $stmt->get_result();
 
                             <form
                                 method="POST"
-                                action="index.php?page=to_do_list"
+                                action="index.php?page=to_dolist"
                             >
 
                                 <input
@@ -315,7 +315,7 @@ $result = $stmt->get_result();
 
                         <form
                             method="POST"
-                            action="index.php?page=to_do_list"
+                            action="index.php?page=to_dolist"
                             onsubmit="return confirm('Are you sure you want to delete this task?');"
                         >
 
