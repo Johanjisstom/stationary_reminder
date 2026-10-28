@@ -136,7 +136,7 @@ unset($_SESSION['todo_message']);
 
 $sql = "SELECT TaskID, UserID, Task_name, Task_description,
                Due_date, Completed, Created_date
-        FROM to_do list
+        FROM to_dolist
         WHERE UserID = ?
         ORDER BY Completed ASC, Due_date ASC, Created_date DESC";
 
@@ -180,7 +180,7 @@ $result = $stmt->get_result();
 
         <h3>Add a Task</h3>
 
-        <form method="POST" action="index.php?page=to_do list">
+        <form method="POST" action="index.php?page=to_dolist">
 
             <label for="Task_name">Task name:</label>
 
