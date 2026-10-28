@@ -14,7 +14,7 @@ $UserID = (int) $_SESSION['UserID'];
 $message = '';
 
 
-$returnPage = 'index.php?page=to_do_list';
+$returnPage = 'index.php?page=to_dolist';
 
 // Add a task
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_task'])) {
