@@ -1,18 +1,14 @@
 
 <?php
-// ============================================
-// TO-DO LIST - STATIONERY REMINDER
-// Database table: to_dolist
-// ============================================
 
-// The session is normally started by index.php.
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 require_once __DIR__ . '/connect.php';
 
-// The page key must match the route in index.php.
+
 $returnPage = 'index.php?page=to_do_list';
 
 // Require login.
@@ -26,15 +22,11 @@ if (!isset($_SESSION['UserID'])) {
 
 $UserID = (int) $_SESSION['UserID'];
 
-// ============================================
-// PROCESS FORM SUBMISSIONS
-// ============================================
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // ----------------------------------------
-    // ADD TASK
-    // ----------------------------------------
+    
     if (isset($_POST['add_task'])) {
 
         $TaskName = trim($_POST['Task_name'] ?? '');
@@ -77,9 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // ----------------------------------------
-    // MARK TASK AS COMPLETED
-    // ----------------------------------------
+   
     elseif (isset($_POST['complete_task'])) {
 
         $TaskID = (int) ($_POST['TaskID'] ?? 0);
@@ -106,9 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // ----------------------------------------
-    // DELETE TASK
-    // ----------------------------------------
+    
     elseif (isset($_POST['delete_task'])) {
 
         $TaskID = (int) ($_POST['TaskID'] ?? 0);
@@ -134,22 +122,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Redirect after processing the form.
-    // This prevents the form from being submitted again on refresh.
+    
     header('Location: ' . $returnPage);
     exit;
 }
 
-// ============================================
-// GET MESSAGE AFTER REDIRECT
-// ============================================
+
 
 $message = $_SESSION['todo_message'] ?? '';
 unset($_SESSION['todo_message']);
 
-// ============================================
-// LOAD THE LOGGED-IN USER'S TASKS
-// ============================================
+
 
 $sql = "SELECT TaskID, UserID, Task_name, Task_description,
                Due_date, Completed, Created_date
