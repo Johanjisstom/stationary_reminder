@@ -123,8 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     
-    header('Location: ' . $returnPage);
-    exit;
+    header("Location: index.php?page=todo");
+exit;
 }
 
 
