@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/connect.php';
 
 
-$returnPage = 'index.php?page=to_dolist';
+$returnPage = 'index.php?page=to_do list';
 
 // Require login.
 if (!isset($_SESSION['UserID'])) {
@@ -136,7 +136,7 @@ unset($_SESSION['todo_message']);
 
 $sql = "SELECT TaskID, UserID, Task_name, Task_description,
                Due_date, Completed, Created_date
-        FROM to_dolist
+        FROM to_do list
         WHERE UserID = ?
         ORDER BY Completed ASC, Due_date ASC, Created_date DESC";
 
@@ -175,7 +175,7 @@ $result = $stmt->get_result();
 
         <h3>Add a Task</h3>
 
-        <form method="POST" action="index.php?page=to_dolist">
+        <form method="POST" action="index.php?page=to_do list">
 
             <label for="Task_name">Task name:</label>
 
