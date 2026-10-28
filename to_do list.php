@@ -1,118 +1,235 @@
 
 <?php
-// index.php
-ob_start();
+// This file is included by index.php.
+// Do not start the session again here.
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Connect to the database if the connection file exists.
 require_once __DIR__ . '/connect.php';
 
-// Read the requested page.
-$page = $_GET['page'] ?? 'home';
-
-// Map page names to their PHP files.
-// Keep these keys consistent with your navigation links.
-$routes = [
-    'home'                 => null,
-    'to_do_list'           => 'to_do list.php',
-    'todo'                 => 'to_do list.php',
-    'sticky_notes'         => 'Sticky_notes.php',
-    'stationary_checklist' => 'stationery_checklist.php',
-    'stationery_checklist' => 'stationery_checklist.php',
-    'search'               => 'search.php',
-    'profile'              => 'profile.php',
-    'login'                => 'login.php',
-    'signup'               => 'signup.php',
-];
-
-// Unknown page names return to the homepage.
-if (!array_key_exists($page, $routes)) {
-    $page = 'home';
+if (!isset($_SESSION['UserID'])) {
+    echo '<h2>Please log in first.</h2>';
+    echo '<p><a href="index.php?page=login">Login here</a></p>';
+    return;
 }
 
-$pageFile = $routes[$page];
-$pageContent = '';
+$UserID = (int) $_SESSION['UserID'];
+$message = '';
 
-// Include the requested page before rendering the shared layout.
-// This lets PHP redirects run before the HTML is sent.
-if ($pageFile !== null) {
-    $fullPath = __DIR__ . '/' . $pageFile;
+// Keep the user on the To-Do Lists page after every action.
+$returnPage = 'index.php?page=to_do_list';
 
-    if (is_file($fullPath)) {
-        ob_start();
-        include $fullPath;
-        $pageContent = ob_get_clean();
+// Add a task
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_task'])) {
+    $TaskName = trim($_POST['TaskName'] ?? '');
+    $TaskDescription = trim($_POST['TaskDescription'] ?? '');
+    $DueDate = trim($_POST['DueDate'] ?? '');
+
+    if ($TaskName === '') {
+        $_SESSION['todo_message'] = 'Please enter a task name.';
     } else {
-        $pageContent =
-            '<div class="page-error">' .
-            '<h2>Page not found</h2>' .
-            '<p>The file <strong>' .
-            htmlspecialchars($pageFile, ENT_QUOTES, 'UTF-8') .
-            '</strong> could not be found in your project folder.</p>' .
-            '<p>Please check the filename in index.php.</p>' .
-            '</div>';
+        $sql = "INSERT INTO to_dolist
+                (UserID, TaskName, TaskDescription, DueDate, Completed)
+                VALUES (?, ?, ?, NULLIF(?, ''), 0)";
+
+        $stmt = $conn->prepare($sql);
+
+        if (!$stmt) {
+            error_log('To-do insert error: ' . $conn->error);
+            $_SESSION['todo_message'] = 'Could not prepare the task. Please check the database structure.';
+        } else {
+            $stmt->bind_param(
+                'isss',
+                $UserID,
+                $TaskName,
+                $TaskDescription,
+                $DueDate
+            );
+
+            if ($stmt->execute()) {
+                $_SESSION['todo_message'] = 'Task added successfully.';
+            } else {
+                error_log('To-do insert error: ' . $stmt->error);
+                $_SESSION['todo_message'] = 'Could not add the task. Please check your database fields.';
+            }
+
+            $stmt->close();
+        }
     }
-} else {
-    $pageContent = '
-        <section class="home-page">
-            <h2>Welcome to Stationery Reminder</h2>
-            <p>Keep track of your stationery, tasks and school day.</p>
-            <div class="home-links">
-                <a href="index.php?page=stationary_checklist">
-                    Stationery Checklist
-                </a>
-                <a href="index.php?page=to_do_list">
-                    To-Do Lists
-                </a>
-                <a href="index.php?page=sticky_notes">
-                    Sticky Notes
-                </a>
-                <a href="index.php?page=search">
-                    Search
-                </a>
-            </div>
-        </section>
-    ';
+
+    header('Location: ' . $returnPage);
+    exit;
 }
 
-// If an included page redirected and exited, execution stops above.
-// Otherwise, display the shared layout.
+// Mark a task as completed
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_task'])) {
+    $TaskID = (int) ($_POST['TaskID'] ?? 0);
+
+    $stmt = $conn->prepare(
+        "UPDATE to_dolist
+         SET Completed = 1
+         WHERE TaskID = ? AND UserID = ?"
+    );
+
+    if ($stmt) {
+        $stmt->bind_param('ii', $TaskID, $UserID);
+        $stmt->execute();
+        $stmt->close();
+
+        $_SESSION['todo_message'] = 'Task updated.';
+    } else {
+        error_log('To-do completion error: ' . $conn->error);
+        $_SESSION['todo_message'] = 'Could not update the task.';
+    }
+
+    header('Location: ' . $returnPage);
+    exit;
+}
+
+// Delete a task
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_task'])) {
+    $TaskID = (int) ($_POST['TaskID'] ?? 0);
+
+    $stmt = $conn->prepare(
+        "DELETE FROM to_dolist
+         WHERE TaskID = ? AND UserID = ?"
+    );
+
+    if ($stmt) {
+        $stmt->bind_param('ii', $TaskID, $UserID);
+        $stmt->execute();
+        $stmt->close();
+
+        $_SESSION['todo_message'] = 'Task deleted.';
+    } else {
+        error_log('To-do delete error: ' . $conn->error);
+        $_SESSION['todo_message'] = 'Could not delete the task.';
+    }
+
+    header('Location: ' . $returnPage);
+    exit;
+}
+
+// Display a one-time message after redirecting.
+if (isset($_SESSION['todo_message'])) {
+    $message = $_SESSION['todo_message'];
+    unset($_SESSION['todo_message']);
+}
+
+// Load this user's tasks.
+$sql = "SELECT *
+        FROM to_dolist
+        WHERE UserID = ?
+        ORDER BY Completed ASC, DueDate ASC";
+
+$stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    error_log('To-do select error: ' . $conn->error);
+    echo '<div class="todo-page"><p>Could not load your tasks. Please check the database structure.</p></div>';
+    return;
+}
+
+$stmt->bind_param('i', $UserID);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stationery Reminder</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header class="site-header">
-        <h1>Stationery Reminder</h1>
-        <p>Stay organised and ready for school.</p>
-    </header>
 
-    <nav class="main-navigation">
-        <a href="index.php">Home</a>
-        <a href="index.php?page=stationary_checklist">
-            Stationery Checklist
-        </a>
-        <a href="index.php?page=to_do_list">To-Do Lists</a>
-        <a href="index.php?page=sticky_notes">Sticky Notes</a>
-        <a href="index.php?page=search">Search</a>
-        <a href="index.php?page=profile">Profile</a>
-    </nav>
+<div class="todo-page">
+    <h2>To-do List</h2>
 
-    <main class="main-content">
-        <?= $pageContent ?>
-    </main>
+    <?php if ($message !== ''): ?>
+        <p class="message">
+            <?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?>
+        </p>
+    <?php endif; ?>
 
-    <footer class="site-footer">
-        <p>Stationery Reminder</p>
-    </footer>
-</body>
-</html>
-<?php ob_end_flush(); ?>
+    <div class="card">
+        <h3>Add a Task</h3>
+
+        <form method="POST" action="index.php?page=to_do_list">
+            <label for="TaskName">Task:</label>
+            <input
+                type="text"
+                id="TaskName"
+                name="TaskName"
+                placeholder="e.g. Complete homework"
+                maxlength="255"
+                required
+            >
+
+            <label for="TaskDescription">Description:</label>
+            <textarea
+                id="TaskDescription"
+                name="TaskDescription"
+                placeholder="Add more information about the task..."
+            ></textarea>
+
+            <label for="DueDate">Due Date:</label>
+            <input type="date" id="DueDate" name="DueDate">
+
+            <button type="submit" name="add_task" value="1">
+                + Add Task
+            </button>
+        </form>
+    </div>
+
+    <h3>My Tasks</h3>
+
+    <?php if ($result->num_rows > 0): ?>
+        <div class="todo-list">
+            <?php while ($task = $result->fetch_assoc()): ?>
+                <div class="todo-item">
+                    <div class="todo-information">
+                        <h3 class="<?= $task['Completed'] ? 'completed-task' : '' ?>">
+                            <?= htmlspecialchars($task['TaskName'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                        </h3>
+
+                        <?php if (!empty($task['TaskDescription'])): ?>
+                            <p>
+                                <?= nl2br(htmlspecialchars($task['TaskDescription'], ENT_QUOTES, 'UTF-8')) ?>
+                            </p>
+                        <?php endif; ?>
+
+                        <?php if (!empty($task['DueDate'])): ?>
+                            <p>
+                                <strong>Due:</strong>
+                                <?= htmlspecialchars($task['DueDate'], ENT_QUOTES, 'UTF-8') ?>
+                            </p>
+                        <?php endif; ?>
+
+                        <?php if ($task['Completed']): ?>
+                            <p class="completed-text">✓ Completed</p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="todo-actions">
+                        <?php if (!$task['Completed']): ?>
+                            <form method="POST" action="index.php?page=to_do_list">
+                                <input type="hidden" name="TaskID" value="<?= (int) $task['TaskID'] ?>">
+                                <button type="submit" name="complete_task" value="1">
+                                    Complete
+                                </button>
+                            </form>
+                        <?php endif; ?>
+
+                        <form method="POST" action="index.php?page=to_do_list"
+                              onsubmit="return confirm('Delete this task?');">
+                            <input type="hidden" name="TaskID" value="<?= (int) $task['TaskID'] ?>">
+                            <button type="submit" name="delete_task" value="1">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+        </div>
+    <?php else: ?>
+        <div class="card">
+            <p>You don't have any tasks yet.</p>
+            <p>Add your first task above!</p>
+        </div>
+    <?php endif; ?>
+</div>
+
+<?php
+$stmt->close();
+?>
