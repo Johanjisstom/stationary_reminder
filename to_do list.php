@@ -9,7 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/connect.php';
 
 
-$returnPage = 'index.php?page=to_do_list';
+$returnPage = 'index.php?page=to_dolist';
 
 // Require login.
 if (!isset($_SESSION['UserID'])) {
