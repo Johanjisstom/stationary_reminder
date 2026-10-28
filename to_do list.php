@@ -1,7 +1,6 @@
 
 <?php
-// This file is included by index.php.
-// Do not start the session again here.
+
 
 require_once __DIR__ . '/connect.php';
 
@@ -14,7 +13,7 @@ if (!isset($_SESSION['UserID'])) {
 $UserID = (int) $_SESSION['UserID'];
 $message = '';
 
-// Keep the user on the To-Do Lists page after every action.
+
 $returnPage = 'index.php?page=to_do_list';
 
 // Add a task
@@ -59,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_task'])) {
     exit;
 }
 
-// Mark a task as completed
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_task'])) {
     $TaskID = (int) ($_POST['TaskID'] ?? 0);
 
@@ -84,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_task'])) {
     exit;
 }
 
-// Delete a task
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_task'])) {
     $TaskID = (int) ($_POST['TaskID'] ?? 0);
 
@@ -108,13 +107,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_task'])) {
     exit;
 }
 
-// Display a one-time message after redirecting.
+
 if (isset($_SESSION['todo_message'])) {
     $message = $_SESSION['todo_message'];
     unset($_SESSION['todo_message']);
 }
 
-// Load this user's tasks.
+
 $sql = "SELECT *
         FROM to_dolist
         WHERE UserID = ?
