@@ -95,7 +95,7 @@ if (isset($_POST['login_submit'])) {
                 Home |
             </a>
 
-            <a href="index.php?page=to_dolists">
+            <a href="index.php?page=to_dolist">
                 To-Do Lists |
             </a>
 
