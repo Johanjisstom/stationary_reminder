@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     
-    header("Location: index.php?page=todo");
+    header("Location: index.php?page=to_dolist");
 exit;
 }
 
